@@ -34,6 +34,7 @@ public class MaterialBatch {
     @Column(name = "expired_date")
     private LocalDate expiredDate;
     private BigDecimal price;
+    private BigDecimal sales;
 
     @Column(name = "created_by")
     private String createdBy;

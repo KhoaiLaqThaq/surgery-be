@@ -58,7 +58,14 @@ public class MaterialBatchServiceImpl implements IMaterialBatchService {
 
 	@Override
 	public MaterialBatchDto get(Long id) {
-		return materialBatchRepository.findById(id).map(materialBatchMapper::entityToDto).orElse(null);
+		MaterialBatch materialBatch = materialBatchRepository.findById(id).get();
+		if (materialBatch != null) {
+			MaterialDto material = materialRepository.findById(materialBatch.getMaterial().getId()).map(materialMapper::entityToDto).orElse(new MaterialDto());
+			MaterialBatchDto materialBatchDto = Optional.ofNullable(materialBatch).map(materialBatchMapper::entityToDto).orElse(null);
+			materialBatchDto.setMaterial(material);
+			return materialBatchDto;
+		}
+		return null;
 	}
 
 	@Override
@@ -66,26 +73,31 @@ public class MaterialBatchServiceImpl implements IMaterialBatchService {
 		MaterialBatch materialBatch = Optional.ofNullable(materialBatchDto).map(materialBatchMapper::dtoToEntity).orElse(null);
 		try {
 			if (materialBatchDto != null) {
-				if (StringUtils.isNoneBlank(materialBatchDto.getMaterialName())) {
-					log.info("---> materialName: {}", materialBatchDto.getMaterialName());
-					String[] names = StringUtils.split(materialBatchDto.getMaterialName(), SymbolEnum.SPACE.val);
+				if (materialBatchDto.getId() != null) {
+					
+				} else {
+					if (StringUtils.isNoneBlank(materialBatchDto.getMaterialName())) {
+						log.info("---> materialName: {}", materialBatchDto.getMaterialName());
+						String[] names = StringUtils.split(materialBatchDto.getMaterialName(), SymbolEnum.SPACE.val);
 
-					Material material = new Material();
-					material.setName(materialBatchDto.getMaterialName());
-					material.setCode(StringHelper.stripAccents(names[0] + new Date().getTime()));
-					material.setComposition("Updating...");
-					material.setTotal(materialBatchDto.getAmount());
-					material.setPrice(materialBatchDto.getPrice());
-					material.setUnit(materialBatchDto.getUnit());
-					if (materialBatchDto.getMaterialTypeId() != null) {
-						MaterialType materialType = materialTypeRepository.findById(materialBatchDto.getMaterialTypeId()).orElse(null);
-						if (materialType != null) {
-							material.setMaterialType(materialType);
+						Material material = new Material();
+						material.setName(materialBatchDto.getMaterialName());
+						material.setCode(StringHelper.stripAccents(names[0] + new Date().getTime()));
+						material.setComposition("Updating...");
+						material.setTotal(materialBatchDto.getAmount());
+						material.setPrice(materialBatchDto.getPrice());
+						material.setSales(materialBatchDto.getSales());
+						material.setUnit(materialBatchDto.getUnit());
+						if (materialBatchDto.getMaterialTypeId() != null) {
+							MaterialType materialType = materialTypeRepository.findById(materialBatchDto.getMaterialTypeId()).orElse(null);
+							if (materialType != null) {
+								material.setMaterialType(materialType);
+							}
 						}
+						material = materialRepository.save(material);
+						materialBatch.setMaterial(material);
+						return Optional.ofNullable(materialBatchRepository.save(materialBatch)).map(materialBatchMapper::entityToDto).orElse(null);
 					}
-					material = materialRepository.save(material);
-					materialBatch.setMaterial(material);
-					return Optional.ofNullable(materialBatchRepository.save(materialBatch)).map(materialBatchMapper::entityToDto).orElse(null);
 				}
 			}
 		} catch (Exception e) {

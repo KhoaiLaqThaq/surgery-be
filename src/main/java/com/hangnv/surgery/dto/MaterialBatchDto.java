@@ -24,6 +24,7 @@ public class MaterialBatchDto extends BaseDto {
     private LocalDate receiptDate;
     private LocalDate expiredDate;
     private BigDecimal price;
+    private BigDecimal sales;
     private String createdBy;
     private LocalDateTime createdDate;
     private String modifiedBy;
