@@ -44,7 +44,7 @@ public class MaterialTypeController {
 	}
 	
 	@PostMapping("/materialType")
-	public ResponseEntity<?> save(@RequestBody MaterialTypeDto materialTypeDto) throws Exception {
+	public ResponseEntity<?> save(@RequestBody MaterialTypeDto materialTypeDto) {
 		return ResponseEntity.ok(iMaterialTypeService.save(materialTypeDto));
 	}
 	

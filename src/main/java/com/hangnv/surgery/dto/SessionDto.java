@@ -37,8 +37,9 @@ public class SessionDto extends BaseDto {
     private BigDecimal leftEye;
     private BigDecimal rightEye;
 
-    private List<PrescriptionDto> prescriptionDtoList;
-    private List<SessionDto> sessionDtoList;
+    private SessionDetailDto sessionDetail;
+    private PatientDto patient;
+    private List<PrescriptionDto> prescriptions;
 
     // for search
     private LocalDateTime searchFromDate;
@@ -48,5 +49,4 @@ public class SessionDto extends BaseDto {
     
     private String patientName;
 
-    private PatientDto patient;
 }

@@ -3,7 +3,6 @@ package com.hangnv.surgery.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -68,7 +67,7 @@ public class Session {
     
     @Column(name = "right_eye")
     private BigDecimal rightEye;
-
+    
     // customer
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", referencedColumnName = "id", nullable = true)

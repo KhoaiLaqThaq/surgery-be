@@ -2,8 +2,6 @@ package com.hangnv.surgery.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -81,4 +79,5 @@ public class MaterialController extends BaseController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(MessageEnum.INTERNAL_SERVER_ERROR.message);
 		}
 	}
+	
 }

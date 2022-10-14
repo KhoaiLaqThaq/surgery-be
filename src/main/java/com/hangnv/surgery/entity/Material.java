@@ -37,11 +37,7 @@ public class Material {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "material_type_id", referencedColumnName = "id", nullable = true)
     private MaterialType materialType;
-
-    // material batch
-    @OneToMany(mappedBy = "material", fetch = FetchType.LAZY)
-    private List<MaterialBatch> materialBatches;
-
+    
     // prescription
     @OneToMany(mappedBy = "material", fetch = FetchType.LAZY)
     private List<Prescription> prescriptions;
