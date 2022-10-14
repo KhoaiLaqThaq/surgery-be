@@ -56,18 +56,6 @@ public class Session {
     @Column(name = "total_price")
     private BigDecimal totalPrice;
     
-    @Column(name = "blood_pressure")
-    private String bloodPressure;
-    
-    private BigDecimal weight;
-    private Integer heartbeat;
-    
-    @Column(name = "left_eye")
-    private BigDecimal leftEye;
-    
-    @Column(name = "right_eye")
-    private BigDecimal rightEye;
-    
     // customer
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", referencedColumnName = "id", nullable = true)

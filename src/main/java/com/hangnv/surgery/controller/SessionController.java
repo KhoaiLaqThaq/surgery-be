@@ -1,5 +1,7 @@
 package com.hangnv.surgery.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequestMapping("/api")
-public class SessionController {
+public class SessionController extends BaseController {
 
 	@Autowired
 	private ISessionService iSessionService;
@@ -51,10 +53,14 @@ public class SessionController {
 	}
 	
 	@PostMapping("/session")
-	public ResponseEntity<?> save(@RequestBody SessionDto sessionDto) {
+	public ResponseEntity<?> save(@RequestBody SessionDto sessionDto, HttpServletRequest request) {
 		log.info("----->Entering: save={}", sessionDto);
-		
+		String accessUsername = getUsernameFromJwtToken(getToken(request));
 		try {
+			if (sessionDto.getId() != null)
+				sessionDto.setModifiedBy(accessUsername);
+			else
+				sessionDto.setCreatedBy(accessUsername);
 			return ResponseEntity.ok(iSessionService.save(sessionDto));
 		} catch (Exception e) {
 			e.printStackTrace();

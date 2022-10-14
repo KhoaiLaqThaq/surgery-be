@@ -30,12 +30,8 @@ public class SessionDto extends BaseDto {
     private LocalDateTime modifiedDate;
     private String modifiedBy;
     private LocalDate nextTime;
+    private String displayNextTime;
     private BigDecimal totalPrice;
-    private String bloodPressure;
-    private BigDecimal weight;
-    private Integer heartbeat;
-    private BigDecimal leftEye;
-    private BigDecimal rightEye;
 
     private SessionDetailDto sessionDetail;
     private PatientDto patient;
