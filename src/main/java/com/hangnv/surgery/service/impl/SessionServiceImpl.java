@@ -16,10 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hangnv.surgery.common.PageDto;
 import com.hangnv.surgery.constant.DatePatternEnum;
+import com.hangnv.surgery.dto.SessionDetailDto;
 import com.hangnv.surgery.dto.SessionDto;
 import com.hangnv.surgery.entity.Session;
 import com.hangnv.surgery.helpers.DateTimeHelper;
+import com.hangnv.surgery.mapper.SessionDetailMapper;
 import com.hangnv.surgery.mapper.SessionMapper;
+import com.hangnv.surgery.repository.SessionDetailRepository;
 import com.hangnv.surgery.repository.SessionRepository;
 import com.hangnv.surgery.service.ISessionService;
 import com.hangnv.surgery.specification.SessionSpecification;
@@ -34,6 +37,10 @@ public class SessionServiceImpl implements ISessionService {
 	private SessionMapper sessionMapper;
 	@Autowired
 	private SessionSpecification sessionSpecification;
+	@Autowired
+	private SessionDetailRepository sessionDetailRepository;
+	@Autowired
+	private SessionDetailMapper sessionDetailMapper;
 
 	@Override
 	public List<SessionDto> gets() {
@@ -42,13 +49,21 @@ public class SessionServiceImpl implements ISessionService {
 
 	@Override
 	public SessionDto get(Long id) {
-		return sessionRepository.findById(id).map(sessionMapper::entityToDto).orElse(null);
+		SessionDto session = sessionRepository.findById(id).map(sessionMapper::entityToDto).orElse(null);
+		if (session != null) {
+			SessionDetailDto sessionDetail = sessionDetailRepository.findBySession_Id(session.getId()).map(sessionDetailMapper::entityToDto).orElse(null);
+			session.setSessionDetail(sessionDetail);
+		}
+		return session;
 	}
 
 	@Override
 	public SessionDto save(SessionDto sessionDto) {
 		Session session = Optional.ofNullable(sessionDto).map(sessionMapper::dtoToEntity).orElse(null);
 		if (session != null) {
+			if (sessionDto.getSessionDetail() != null) {
+				sessionDetailRepository.save(Optional.ofNullable(sessionDto.getSessionDetail()).map(sessionDetailMapper::dtoToEntity).orElse(null));
+			}
 			return Optional.ofNullable(sessionRepository.save(session)).map(sessionMapper::entityToDto).orElse(null);
 		}
 		return null;
