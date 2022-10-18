@@ -10,7 +10,6 @@ public interface IUserService {
 	List<UserDto> gets();
 	UserDto get(Long id);
 	PageDto search(UserDto criteria);
-	
-	
+	UserDto save(UserDto userDto);
 	
 }

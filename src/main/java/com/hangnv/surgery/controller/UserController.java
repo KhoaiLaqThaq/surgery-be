@@ -1,5 +1,7 @@
 package com.hangnv.surgery.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequestMapping("/api")
-public class UserController {
+public class UserController extends BaseController {
 	
 	@Autowired
 	private IUserService iUserService;
@@ -48,5 +50,21 @@ public class UserController {
 	public ResponseEntity<?> search(@RequestBody UserDto criteria) {
 		log.info("-------->Entering: search={}", criteria);
 		return ResponseEntity.ok(iUserService.search(criteria));
+	}
+	
+	@PostMapping("/signUp")
+	public ResponseEntity<?> register(@RequestBody UserDto userDto, HttpServletRequest request) {
+		log.info("--------> Entering: register={}", userDto);
+		String accessUsername = getUsernameFromJwtToken(getToken(request));
+		try {
+			if (userDto.getId() != null)
+				userDto.setModifiedBy(accessUsername);
+			else
+				userDto.setCreatedBy(accessUsername);
+			return ResponseEntity.ok(iUserService.save(userDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
 	}
 }

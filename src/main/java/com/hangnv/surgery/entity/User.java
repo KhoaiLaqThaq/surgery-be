@@ -13,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -60,5 +62,15 @@ public class User {
             @JoinColumn(name = "role_id", nullable = false, updatable = false)
     })
     private Set<Role> roles;
+    
+    @PrePersist
+    public void prePersist() {
+    	setCreatedDate(LocalDateTime.now());
+    }
+    
+    @PreUpdate
+    public void preUpdate() {
+    	setModifiedDate(LocalDateTime.now());
+    }
 
 }

@@ -11,7 +11,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hangnv.surgery.dto.JwtResponse;
 import com.hangnv.surgery.dto.LoginRequest;
-import com.hangnv.surgery.repository.RoleRepository;
-import com.hangnv.surgery.repository.UserRepository;
 import com.hangnv.surgery.security.JwtUtils;
 import com.hangnv.surgery.service.impl.UserDetailsImpl;
 
@@ -33,12 +30,6 @@ public class LoginController {
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private RoleRepository roleRepository;
-	@Autowired
-	private PasswordEncoder encoder;
 	@Autowired
 	private JwtUtils jwtUtils;
 	

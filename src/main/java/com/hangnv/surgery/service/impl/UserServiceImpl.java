@@ -1,12 +1,15 @@
 package com.hangnv.surgery.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,8 @@ public class UserServiceImpl implements IUserService {
 	private UserMapper userMapper;
 	@Autowired
 	private UserSpecification userSpecification;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	@Override
 	public List<UserDto> gets() {
@@ -51,6 +56,19 @@ public class UserServiceImpl implements IUserService {
 				.totalPages(page.getTotalPages())
 				.totalElements(page.getTotalElements())
 				.build();
+	}
+
+	@Override
+	public UserDto save(UserDto userDto) {
+		if (userDto != null) {
+			User user = Optional.ofNullable(userDto).map(userMapper::dtoToEntity).orElse(new User());
+			if (StringUtils.isNoneBlank(userDto.getPassword()))
+				user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+			else
+				user.setPassword(passwordEncoder.encode("1234567a@"));
+			return Optional.ofNullable(userRepository.save(user)).map(userMapper::entityToDto).orElse(null);
+		}
+		return null;
 	}
 
 	

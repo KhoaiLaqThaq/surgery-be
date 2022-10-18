@@ -1,6 +1,7 @@
 package com.hangnv.surgery.dto;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import com.hangnv.surgery.common.BaseDto;
 
@@ -25,4 +26,5 @@ public class UserDto extends BaseDto {
 	private String createdBy;
 	private LocalDateTime createdDate;
 	
+	private Set<RoleDto> roles;
 }
