@@ -1,5 +1,8 @@
 package com.hangnv.surgery.entity;
 
+import java.math.BigDecimal;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,6 +25,8 @@ public class Prescription {
     private String dosage;
     private Integer amount;
     private String unit;
+    @Column(name = "total_price")
+    private BigDecimal totalPrice;
     private String note;
 
     @ManyToOne

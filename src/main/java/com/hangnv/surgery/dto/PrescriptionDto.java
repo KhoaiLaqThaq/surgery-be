@@ -1,5 +1,7 @@
 package com.hangnv.surgery.dto;
 
+import java.math.BigDecimal;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,7 @@ public class PrescriptionDto {
     private String dosage;
     private Integer amount;
     private String unit;
+    private BigDecimal totalPrice;
     private String note;
 
     private SessionDto session;
