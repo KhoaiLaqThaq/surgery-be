@@ -1,7 +1,9 @@
 package com.hangnv.surgery.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -17,23 +19,34 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hangnv.surgery.common.PageDto;
 import com.hangnv.surgery.constant.DatePatternEnum;
+import com.hangnv.surgery.dto.MaterialDto;
 import com.hangnv.surgery.dto.PatientDto;
+import com.hangnv.surgery.dto.PrescriptionDto;
 import com.hangnv.surgery.dto.SessionDetailDto;
 import com.hangnv.surgery.dto.SessionDto;
+import com.hangnv.surgery.entity.Material;
 import com.hangnv.surgery.entity.Patient;
+import com.hangnv.surgery.entity.Prescription;
 import com.hangnv.surgery.entity.Session;
 import com.hangnv.surgery.entity.SessionDetail;
 import com.hangnv.surgery.helpers.DateTimeHelper;
 import com.hangnv.surgery.helpers.StringHelper;
+import com.hangnv.surgery.mapper.MaterialMapper;
 import com.hangnv.surgery.mapper.PatientMapper;
+import com.hangnv.surgery.mapper.PrescriptionMapper;
 import com.hangnv.surgery.mapper.SessionDetailMapper;
 import com.hangnv.surgery.mapper.SessionMapper;
+import com.hangnv.surgery.repository.MaterialRepository;
 import com.hangnv.surgery.repository.PatientRepository;
+import com.hangnv.surgery.repository.PrescriptionRepository;
 import com.hangnv.surgery.repository.SessionDetailRepository;
 import com.hangnv.surgery.repository.SessionRepository;
 import com.hangnv.surgery.service.ISessionService;
 import com.hangnv.surgery.specification.SessionSpecification;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @Transactional
 public class SessionServiceImpl implements ISessionService {
@@ -52,6 +65,14 @@ public class SessionServiceImpl implements ISessionService {
 	private PatientRepository patientRepository;
 	@Autowired
 	private PatientMapper patientMapper;
+	@Autowired
+	private PrescriptionRepository prescriptionRepository;
+	@Autowired
+	private PrescriptionMapper prescriptionMapper;
+	@Autowired
+	private MaterialRepository materialRepository;
+	@Autowired
+	private MaterialMapper materialMapper;
 
 	@Override
 	public List<SessionDto> gets() {
@@ -71,6 +92,18 @@ public class SessionServiceImpl implements ISessionService {
 					PatientDto patient = patientRepository.findById(sessionEntity.getPatient().getId()).map(patientMapper::entityToDto).orElse(null);
 					session.setPatient(patient);
 				}
+				// get Prescriptions
+				List<PrescriptionDto> prescriptionList = new ArrayList<>();
+				List<Prescription> prescriptions = prescriptionRepository.findBySession_Id(id);
+				prescriptions.stream().forEach(p -> {
+					PrescriptionDto prescription = Optional.ofNullable(p).map(prescriptionMapper::entityToDto).orElse(null);
+					if (prescription != null) {
+						MaterialDto material = Optional.ofNullable(p.getMaterial()).map(materialMapper::entityToDto).orElse(null);
+						prescription.setMaterial(material);
+					}
+					prescriptionList.add(prescription);
+				});
+				session.setPrescriptions(prescriptionList);
 			}
 			return session;
 		}
@@ -92,8 +125,6 @@ public class SessionServiceImpl implements ISessionService {
 						patient.setDob(dob);
 					}
 				}
-				
-				
 				patient = patientRepository.save(patient);
 				session.setPatient(patient);
 			}
@@ -115,6 +146,53 @@ public class SessionServiceImpl implements ISessionService {
 				sessionDetail = sessionDetailRepository.save(sessionDetail);
 			}
 			
+			List<Prescription> prescriptions = sessionDto.getPrescriptions().stream().map(prescriptionMapper::dtoToEntity).collect(Collectors.toList());
+			if (prescriptions != null && prescriptions.size() > 0) {
+				for (Prescription p : prescriptions) {
+					p.setSession(session);
+					Material material = materialRepository.findById(p.getMaterial().getId()).get();
+					Integer materialTotal = material.getTotal() - p.getAmount();
+					
+					// Trường hợp tồn kho nhiều hơn trong đơn thuốc
+					if (materialTotal >= 0) {
+						material.setTotal(materialTotal);
+						material = materialRepository.save(material);
+					} else {
+						// Trường hợp tồn kho không đủ nhưng trong lô nhập khác còn
+						material.setTotal(0);
+						material = materialRepository.save(material);
+						List<MaterialDto> materials = materialRepository.findByName(material.getName()).stream().map(materialMapper::entityToDto).collect(Collectors.toList());
+						if (materials.size() > 1) {
+							final Long materialId = material.getId();
+							List<MaterialDto> materialList = materials
+									.stream()
+									.filter(m -> m.getId() != materialId).collect(Collectors.toList());
+							log.info("materialFilter: {}", materialList);
+							if (materialList != null && materialList.size() > 0) {
+								MaterialDto materialDto = materialList.get(0);
+								if (materialDto != null && materialDto.getSales() != null) {
+									Integer amount = Math.abs(materialTotal);
+									Prescription prescription = new Prescription();
+									prescription.setAmount(amount);
+									prescription.setDosage(p.getDosage());
+									prescription.setUnit(materialDto.getUnit());
+									prescription.setTotalPrice(materialDto.getSales().multiply(new BigDecimal(amount)));
+									prescription.setNote(p.getNote());
+									prescription.setMaterial(Optional.ofNullable(materialDto).map(materialMapper::dtoToEntity).orElse(null));
+									prescription.setSession(session);
+									prescriptions.add(prescription);
+								}
+							}
+						}
+						
+						// set amount for prescription
+						p.setAmount(material.getTotal());
+					}
+					
+				}
+				prescriptionRepository.saveAll(prescriptions);
+			}
+			
 			return Optional.ofNullable(session).map(sessionMapper::entityToDto).orElse(null);
 		}
 		return null;
@@ -130,7 +208,7 @@ public class SessionServiceImpl implements ISessionService {
 			LocalDate toDate = DateTimeHelper.stringToLocalDate(criteria.getDisplaySearchToDate(), DatePatternEnum.DD_MM_YYYY_1.pattern);
 			criteria.setSearchToDate(toDate.atTime(LocalTime.MAX));
 		}
-		Page<Session> page = sessionRepository.findAll(sessionSpecification.filter(criteria), PageRequest.of(criteria.getPage(), criteria.getSize(), Sort.by(Sort.DEFAULT_DIRECTION, "createdDate")));
+		Page<Session> page = sessionRepository.findAll(sessionSpecification.filter(criteria), PageRequest.of(criteria.getPage(), criteria.getSize(), Sort.by(Sort.Direction.DESC, "createdDate")));
 		return PageDto.builder()
 						.content(page.getContent().stream().map(sessionMapper::entityToDto).collect(Collectors.toList()))
 						.number(page.getNumber())

@@ -27,6 +27,7 @@ public class MaterialDto extends BaseDto {
     private BigDecimal sales;
 
     private MaterialTypeDto materialType;
+    private Long materialTypeId;
     private List<PrescriptionDto> prescriptions;
     
     private String keyword;

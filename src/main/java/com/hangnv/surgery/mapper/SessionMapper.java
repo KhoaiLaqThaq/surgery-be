@@ -10,6 +10,7 @@ import com.hangnv.surgery.entity.Session;
 public interface SessionMapper {
 
 	@Mapping(target = "patient", expression = "java(null)")
+	@Mapping(target = "prescriptions", expression = "java(null)")
     SessionDto entityToDto(Session entity);
     Session dtoToEntity(SessionDto dto);
 

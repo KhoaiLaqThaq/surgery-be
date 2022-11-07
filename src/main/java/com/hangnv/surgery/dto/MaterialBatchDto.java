@@ -31,7 +31,6 @@ public class MaterialBatchDto extends BaseDto {
     private LocalDateTime modifiedDate;
 
     private MaterialDto material;
-    private String materialName;
     
     private Long materialTypeId;
     private String displayExpiredDate;

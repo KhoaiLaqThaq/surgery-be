@@ -11,7 +11,7 @@ import com.hangnv.surgery.entity.Material;
 @Repository
 public interface MaterialRepository extends JpaRepository<Material, Long>, JpaSpecificationExecutor<Material> {
 
-	List<Material> findByNameContainingIgnoreCase(String name);
+	List<Material> findByNameContainingIgnoreCaseAndTotalGreaterThan(String name, Integer total);
 	List<Material> findByName(String name);
 	
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hangnv.surgery.dto.SystemParameterDto;
@@ -37,6 +38,12 @@ public class SystemParamController {
 			return ResponseEntity.ok(iSystemParameterService.get(Long.parseLong(id)));
 		} else 
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Id must be a numeric!");
+	}
+	
+	@GetMapping("/systemParam")
+	public ResponseEntity<?> getByName(@RequestParam(name = "name", required = true) String paramName) {
+		log.info("---->Entering: get-by-name={}", paramName);
+		return ResponseEntity.ok(iSystemParameterService.getByParamName(paramName));
 	}
 	
 	@PostMapping("/systemParam")

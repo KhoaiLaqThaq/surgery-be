@@ -73,31 +73,29 @@ public class MaterialBatchServiceImpl implements IMaterialBatchService {
 		MaterialBatch materialBatch = Optional.ofNullable(materialBatchDto).map(materialBatchMapper::dtoToEntity).orElse(null);
 		try {
 			if (materialBatchDto != null) {
-				if (materialBatchDto.getId() != null) {
+				Material material = Optional.ofNullable(materialBatchDto.getMaterial()).map(materialMapper::dtoToEntity).orElse(null);
+				if (StringUtils.isNoneBlank(material.getName())) {
+					log.info("---> materialName: {}", material.getName());
 					
-				} else {
-					if (StringUtils.isNoneBlank(materialBatchDto.getMaterialName())) {
-						log.info("---> materialName: {}", materialBatchDto.getMaterialName());
-						String[] names = StringUtils.split(materialBatchDto.getMaterialName(), SymbolEnum.SPACE.val);
-
-						Material material = new Material();
-						material.setName(materialBatchDto.getMaterialName());
-						material.setCode(StringHelper.stripAccents(names[0] + new Date().getTime()));
-						material.setComposition("Updating...");
-						material.setTotal(materialBatchDto.getAmount());
-						material.setPrice(materialBatchDto.getPrice());
-						material.setSales(materialBatchDto.getSales());
-						material.setUnit(materialBatchDto.getUnit());
-						if (materialBatchDto.getMaterialTypeId() != null) {
-							MaterialType materialType = materialTypeRepository.findById(materialBatchDto.getMaterialTypeId()).orElse(null);
+					if (material != null) {
+						if (material.getId() == null) {
+							String[] names = StringUtils.split(material.getName(), SymbolEnum.SPACE.val);
+							material.setCode(StringHelper.stripAccents(names[0] + new Date().getTime()));
+						}
+						if (materialBatchDto.getMaterial().getMaterialTypeId() != null) {
+							MaterialType materialType = materialTypeRepository.findById(materialBatchDto.getMaterial().getMaterialTypeId()).orElse(null);
 							if (materialType != null) {
 								material.setMaterialType(materialType);
 							}
 						}
-						material = materialRepository.save(material);
-						materialBatch.setMaterial(material);
-						return Optional.ofNullable(materialBatchRepository.save(materialBatch)).map(materialBatchMapper::entityToDto).orElse(null);
 					}
+					material.setPrice(materialBatchDto.getPrice());
+					material.setSales(materialBatchDto.getSales());
+					material.setUnit(materialBatchDto.getUnit());
+					material.setTotal(materialBatchDto.getAmount());
+					material = materialRepository.save(material);
+					materialBatch.setMaterial(material);
+					return Optional.ofNullable(materialBatchRepository.save(materialBatch)).map(materialBatchMapper::entityToDto).orElse(null);
 				}
 			}
 		} catch (Exception e) {

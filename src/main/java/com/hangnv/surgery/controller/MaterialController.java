@@ -67,13 +67,12 @@ public class MaterialController extends BaseController {
 	@PostMapping("/material/name")
 	public ResponseEntity<?> getByName(@RequestBody MaterialDto criteria) {
 		log.info("------>Entering: material-by-name: {}", criteria);
-//		String accessUsername = getUsernameFromJwtToken(getToken(request));
 		try {
 			List<MaterialDto> materials = iMaterialService.getsByName(criteria);
 			if (materials != null && materials.size() > 0)
 				return ResponseEntity.status(HttpStatus.OK).body(materials);
 			else
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageEnum.NOT_FOUND.message);
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(MessageEnum.INTERNAL_SERVER_ERROR.message);

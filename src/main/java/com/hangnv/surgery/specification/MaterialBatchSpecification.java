@@ -24,8 +24,8 @@ public class MaterialBatchSpecification extends BaseSpecification {
 				predicates.add(cb.like(cb.upper(root.get("code")), code));
 			}
 			
-			if (StringUtils.isNoneBlank(criteria.getMaterialName())) {
-				String materialName = queryFilter(criteria.getMaterialName());
+			if (StringUtils.isNoneBlank(criteria.getMaterial().getName())) {
+				String materialName = queryFilter(criteria.getMaterial().getName());
 				predicates.add(cb.like(cb.upper(root.get("material").get("name")), materialName));
 			}
 			
