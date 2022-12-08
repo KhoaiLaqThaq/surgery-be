@@ -18,6 +18,17 @@ public class MaterialSpecification extends BaseSpecification {
 	public Specification<Material> filter(final MaterialDto criteria) {
 		return (root, query, cb) -> {
 			List<Predicate> predicates = new ArrayList<>();
+			
+			if (StringUtils.isNotBlank(criteria.getKeyword())) {
+				String keyword = queryFilter(criteria.getKeyword());
+				predicates.add(cb.or(
+						cb.like(root.get("name"), keyword),
+						cb.like(root.get("suggest"), keyword),
+						cb.like(root.get("composition"), keyword)
+						)
+					);
+			}
+			
 			if (StringUtils.isNoneBlank(criteria.getCode())) {
 				String code = queryFilter(criteria.getCode());
 				predicates.add(cb.like(root.get("code"), code));

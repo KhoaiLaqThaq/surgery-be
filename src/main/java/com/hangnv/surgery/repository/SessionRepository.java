@@ -12,5 +12,6 @@ import com.hangnv.surgery.entity.Session;
 public interface SessionRepository extends JpaRepository<Session , Long>, JpaSpecificationExecutor<Session>{
 
 	List<Session> findByPatient_Id(Long id);
+	List<Session> findFirst5ByOrderByIdDesc();
 	
 }

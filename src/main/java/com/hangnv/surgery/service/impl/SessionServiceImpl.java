@@ -78,6 +78,26 @@ public class SessionServiceImpl implements ISessionService {
 	public List<SessionDto> gets() {
 		return sessionRepository.findAll().stream().map(sessionMapper::entityToDto).collect(Collectors.toList());
 	}
+	
+	@Override
+	public List<SessionDto> getByTop5() {
+		log.info("Entering: get-by-top-5");
+		List<Session> sessions = sessionRepository.findFirst5ByOrderByIdDesc();
+		if (sessions != null) {
+			List<SessionDto> sessionDtos = new ArrayList<>();
+			sessions.stream().forEach(session -> {
+				SessionDto sessionDto = Optional.ofNullable(session).map(sessionMapper::entityToDto).orElse(null);
+				PatientDto patientDto = Optional.ofNullable(session.getPatient()).map(patientMapper::entityToDto).orElse(null);
+				if (sessionDto != null) {
+					sessionDto.setPatient(patientDto);
+					sessionDtos.add(sessionDto);
+				}
+			});
+			
+			return sessionDtos;
+		}
+		return null;
+	}
 
 	@Override
 	public SessionDto get(Long id) {
@@ -224,5 +244,6 @@ public class SessionServiceImpl implements ISessionService {
 	public List<SessionDto> getsByPatientId(Long patientId) {
 		return sessionRepository.findByPatient_Id(patientId).stream().map(sessionMapper::entityToDto).collect(Collectors.toList());
 	}
+
 
 }

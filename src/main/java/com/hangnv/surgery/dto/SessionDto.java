@@ -32,6 +32,7 @@ public class SessionDto extends BaseDto {
     private LocalDate nextTime;
     private String displayNextTime;
     private BigDecimal totalPrice;
+    private Boolean freeCostService;
 
     private SessionDetailDto sessionDetail;
     private PatientDto patient;

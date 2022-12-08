@@ -8,6 +8,7 @@ import com.hangnv.surgery.dto.SessionDto;
 public interface ISessionService {
 
 	List<SessionDto> gets();
+	List<SessionDto> getByTop5();
 	SessionDto get(Long id);
 	SessionDto save(SessionDto session);
 	PageDto search(SessionDto criteria);

@@ -33,6 +33,12 @@ public class SessionController extends BaseController {
 		return ResponseEntity.ok(iSessionService.gets());
 	}
 	
+	@GetMapping("/session/top5")
+	public ResponseEntity<?> getByTop5() {
+		log.info("------->Entering: gets-top-5()...");
+		return ResponseEntity.ok(iSessionService.getByTop5());
+	}
+	
 	@GetMapping("/session/{id}")
 	public ResponseEntity<?> get(@PathVariable String id) {
 		log.info("------->Entering: get-by-id={}", id);

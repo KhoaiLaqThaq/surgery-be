@@ -56,6 +56,9 @@ public class Session {
     @Column(name = "total_price")
     private BigDecimal totalPrice;
     
+    @Column(name = "free_cost_service")
+    private Boolean freeCostService;
+    
     // customer
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", referencedColumnName = "id", nullable = true)
