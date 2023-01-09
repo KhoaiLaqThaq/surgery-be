@@ -12,5 +12,6 @@ import com.hangnv.surgery.entity.Patient;
 public interface PatientRepository extends JpaRepository<Patient, Long>, JpaSpecificationExecutor<Patient> {
 
 	Optional<Patient> findByName(String name);
+	long count();
 	
 }
