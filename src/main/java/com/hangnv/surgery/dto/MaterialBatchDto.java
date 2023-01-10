@@ -36,8 +36,8 @@ public class MaterialBatchDto extends BaseDto {
     private String displayExpiredDate;
     
     // for search
-    private LocalDate searchFromDate;
-    private LocalDate searchToDate;
+    private LocalDateTime searchFromDate;
+    private LocalDateTime searchToDate;
     private BigDecimal maxPrice;
     private BigDecimal minPrice;
     

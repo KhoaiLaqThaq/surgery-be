@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hangnv.surgery.dto.SessionDto;
+import com.hangnv.surgery.dto.StatisticChartDto;
 import com.hangnv.surgery.entity.Material;
 import com.hangnv.surgery.entity.Prescription;
 import com.hangnv.surgery.mapper.SessionMapper;
@@ -44,6 +45,7 @@ public class StatisticServiceImpl implements IStatisticService {
 			long totalSession = 0;
 			long totalReceive = 0;
 			StatisticDto responseData = new StatisticDto();
+			responseData.setTotalRevenue(BigDecimal.ZERO);
 			List<SessionDto> sessions = new ArrayList<>();
 			
 			if (range != null && range.size() > 1) {
@@ -54,7 +56,11 @@ public class StatisticServiceImpl implements IStatisticService {
 						.findByCreatedDateBetween(startDate, endDate)
 						.stream().map(sessionMapper::entityToDto).collect(Collectors.toList());
 				// xem lai cho nay
-				totalReceive = materialBatchRepository.calulateTotalReceiveBetween(startDate, endDate);
+				try {
+					totalReceive = materialBatchRepository.calulateTotalReceiveBetween(startDate, endDate);
+				} catch (Exception e) {
+					totalReceive = 0;
+				}
 			} else {
 				log.info("default filter statistic data");
 				// default value
@@ -72,9 +78,7 @@ public class StatisticServiceImpl implements IStatisticService {
 								// TODO: Calculate revenue per material
 								BigDecimal revenue = material.getSales().subtract(material.getPrice());
 								// TODO: Add revenue in totalRevenue
-								BigDecimal totalRevenue = responseData.getTotalRevenue() != null 
-										? responseData.getTotalRevenue().add(revenue) 
-										: revenue;
+								BigDecimal totalRevenue = responseData.getTotalRevenue().add(revenue);
 								responseData.setTotalRevenue(totalRevenue);
 							}
 						});
@@ -91,5 +95,12 @@ public class StatisticServiceImpl implements IStatisticService {
 		}
 		
 		return new StatisticDto();
+	}
+
+	@Override
+	public StatisticChartDto getStatisticChart() {
+		List<Integer> months = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+		
+		return null;
 	}
 }

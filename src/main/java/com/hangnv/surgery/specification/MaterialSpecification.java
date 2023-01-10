@@ -1,5 +1,6 @@
 package com.hangnv.surgery.specification;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +48,12 @@ public class MaterialSpecification extends BaseSpecification {
 			if (StringUtils.isNoneBlank(criteria.getSuggest())) {
 				String suggest = queryFilter(criteria.getSuggest());
 				predicates.add(cb.like(cb.upper(root.get("suggest")), suggest));
+			}
+			
+			if (criteria.getMinPrice() != null && criteria.getMaxPrice() != null) {
+				BigDecimal minPrice = new BigDecimal(criteria.getMinPrice());
+				BigDecimal maxPrice = new BigDecimal(criteria.getMaxPrice());
+				predicates.add(cb.between(root.get("price"), minPrice, maxPrice));
 			}
 			
 			return cb.and(predicates.stream().toArray(Predicate[]::new));

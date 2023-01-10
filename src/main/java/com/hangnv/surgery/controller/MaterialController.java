@@ -79,4 +79,18 @@ public class MaterialController extends BaseController {
 		}
 	}
 	
+	@PostMapping("/material/nameAndTotalExist")
+	public ResponseEntity<?> getByNameAndTotalExist(@RequestBody MaterialDto criteria) {
+		log.info("------>Entering: material-by-name: {}", criteria);
+		try {
+			List<MaterialDto> materials = iMaterialService.getByNameAndTotalExist(criteria);
+			if (materials != null && materials.size() > 0)
+				return ResponseEntity.status(HttpStatus.OK).body(materials);
+			else
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(MessageEnum.INTERNAL_SERVER_ERROR.message);
+		}
+	}
 }

@@ -37,6 +37,10 @@ public class MaterialBatchSpecification extends BaseSpecification {
 				predicates.add(cb.lessThanOrEqualTo(root.get("price"), criteria.getMaxPrice()));
 			}
 			
+			if (criteria.getSearchFromDate() != null && criteria.getSearchToDate() != null) {
+				predicates.add(cb.between(root.get("createdDate"), criteria.getSearchFromDate(), criteria.getSearchToDate()));
+			}
+			
 			return cb.and(predicates.stream().toArray(Predicate[]::new));
 		};
 	}

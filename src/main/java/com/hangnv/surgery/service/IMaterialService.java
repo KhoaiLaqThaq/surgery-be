@@ -12,5 +12,6 @@ public interface IMaterialService {
 	MaterialDto save(MaterialDto material);
 	PageDto search(MaterialDto criteria);
 	List<MaterialDto> getsByName(MaterialDto criteria);
+	List<MaterialDto> getByNameAndTotalExist(MaterialDto criteria);
 	
 }

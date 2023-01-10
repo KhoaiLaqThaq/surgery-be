@@ -167,50 +167,54 @@ public class SessionServiceImpl implements ISessionService {
 			}
 			
 			List<Prescription> prescriptions = sessionDto.getPrescriptions().stream().map(prescriptionMapper::dtoToEntity).collect(Collectors.toList());
-			if (prescriptions != null && prescriptions.size() > 0) {
-				for (Prescription p : prescriptions) {
-					p.setSession(session);
-					Material material = materialRepository.findById(p.getMaterial().getId()).get();
-					Integer materialTotal = material.getTotal() - p.getAmount();
-					
-					// Trường hợp tồn kho nhiều hơn trong đơn thuốc
-					if (materialTotal >= 0) {
-						material.setTotal(materialTotal);
-						material = materialRepository.save(material);
-					} else {
-						// Trường hợp tồn kho không đủ nhưng trong lô nhập khác còn
-						material.setTotal(0);
-						material = materialRepository.save(material);
-						List<MaterialDto> materials = materialRepository.findByName(material.getName()).stream().map(materialMapper::entityToDto).collect(Collectors.toList());
-						if (materials.size() > 1) {
-							final Long materialId = material.getId();
-							List<MaterialDto> materialList = materials
-									.stream()
-									.filter(m -> m.getId() != materialId).collect(Collectors.toList());
-							log.info("materialFilter: {}", materialList);
-							if (materialList != null && materialList.size() > 0) {
-								MaterialDto materialDto = materialList.get(0);
-								if (materialDto != null && materialDto.getSales() != null) {
-									Integer amount = Math.abs(materialTotal);
-									Prescription prescription = new Prescription();
-									prescription.setAmount(amount);
-									prescription.setDosage(p.getDosage());
-									prescription.setUnit(materialDto.getUnit());
-									prescription.setTotalPrice(materialDto.getSales().multiply(new BigDecimal(amount)));
-									prescription.setNote(p.getNote());
-									prescription.setMaterial(Optional.ofNullable(materialDto).map(materialMapper::dtoToEntity).orElse(null));
-									prescription.setSession(session);
-									prescriptions.add(prescription);
+			List<Prescription> preList = prescriptions.stream().filter(p -> p.getMaterial() != null).toList();
+			log.info("--------------------------prescriptionFilter: {}", preList);
+			
+			if (preList != null && preList.size() > 0) {
+				for (Prescription p : preList) {
+					if (p != null && p.getMaterial() != null) {
+						p.setSession(session);
+						Material material = materialRepository.findById(p.getMaterial().getId()).get();
+						Integer materialTotal = material.getTotal() - p.getAmount();
+						
+						// Trường hợp tồn kho nhiều hơn trong đơn thuốc
+						if (materialTotal >= 0) {
+							material.setTotal(materialTotal);
+							material = materialRepository.save(material);
+						} else {
+							// Trường hợp tồn kho không đủ nhưng trong lô nhập khác còn
+							material.setTotal(0);
+							material = materialRepository.save(material);
+							List<MaterialDto> materials = materialRepository.findByNameLike(material.getName()).stream().map(materialMapper::entityToDto).collect(Collectors.toList());
+							if (materials.size() > 1) {
+								final Long materialId = material.getId();
+								List<MaterialDto> materialList = materials
+										.stream()
+										.filter(m -> m.getId() != materialId).collect(Collectors.toList());
+								log.info("--------------------------materialFilter: {}", materialList);
+								
+								if (materialList != null && materialList.size() > 0) {
+									MaterialDto materialDto = materialList.get(0);
+									if (materialDto != null && materialDto.getSales() != null) {
+										Integer amount = Math.abs(materialTotal);
+										Prescription prescription = new Prescription();
+										prescription.setAmount(amount);
+										prescription.setDosage(p.getDosage());
+										prescription.setUnit(materialDto.getUnit());
+										prescription.setTotalPrice(materialDto.getSales().multiply(new BigDecimal(amount)));
+										prescription.setNote(p.getNote());
+										prescription.setMaterial(Optional.ofNullable(materialDto).map(materialMapper::dtoToEntity).orElse(null));
+										prescription.setSession(session);
+										preList.add(prescription);
+									}
 								}
 							}
+							// set amount for prescription
+							p.setAmount(material.getTotal());
 						}
-						
-						// set amount for prescription
-						p.setAmount(material.getTotal());
 					}
-					
 				}
-				prescriptionRepository.saveAll(prescriptions);
+				prescriptionRepository.saveAll(preList);
 			}
 			
 			return Optional.ofNullable(session).map(sessionMapper::entityToDto).orElse(null);
@@ -220,14 +224,6 @@ public class SessionServiceImpl implements ISessionService {
 
 	@Override
 	public PageDto search(SessionDto criteria) {
-		if (StringUtils.isNoneBlank(criteria.getDisplaySearchFromDate())) {
-			LocalDate fromDate = DateTimeHelper.stringToLocalDate(criteria.getDisplaySearchFromDate(), DatePatternEnum.DD_MM_YYYY_1.pattern);
-			criteria.setSearchFromDate(fromDate.atStartOfDay());
-		}
-		if (StringUtils.isNoneBlank(criteria.getDisplaySearchToDate())) {
-			LocalDate toDate = DateTimeHelper.stringToLocalDate(criteria.getDisplaySearchToDate(), DatePatternEnum.DD_MM_YYYY_1.pattern);
-			criteria.setSearchToDate(toDate.atTime(LocalTime.MAX));
-		}
 		Page<Session> page = sessionRepository.findAll(sessionSpecification.filter(criteria), PageRequest.of(criteria.getPage(), criteria.getSize(), Sort.by(Sort.Direction.DESC, "createdDate")));
 		return PageDto.builder()
 						.content(page.getContent().stream().map(sessionMapper::entityToDto).collect(Collectors.toList()))

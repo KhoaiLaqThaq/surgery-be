@@ -70,6 +70,13 @@ public class MaterialServiceImpl implements IMaterialService {
 	@Override
 	public List<MaterialDto> getsByName(MaterialDto criteria) {
 		log.info("-----> Entering: gets-by-name: {}", criteria);
+		return materialRepository.findByNameContainingIgnoreCase(criteria.getName())
+				.stream().map(materialMapper::entityToDto).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<MaterialDto> getByNameAndTotalExist(MaterialDto criteria) {
+		log.info("-----> Entering: gets-by-name: {}", criteria);
 		return materialRepository.findByNameContainingIgnoreCaseAndTotalGreaterThan(criteria.getName(), 0)
 				.stream().map(materialMapper::entityToDto).collect(Collectors.toList());
 	}
